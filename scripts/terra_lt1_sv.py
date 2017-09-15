@@ -195,6 +195,9 @@ def main():
                                                                     hierarchy=nir_hierarchy, device=device,
                                                                     debug=args.debug)
 
+    if args.writeimg:
+        outfile = args.outdir + "/" + nir_filename
+
     # Analyze NIR signal data
     device, nhist_header, nhist_data, nir_imgs = pcv.analyze_NIR_intensity(img=nir_img, rgbimg=nir_rgb,
                                                                            mask=nir_combinedmask, bins=256,
