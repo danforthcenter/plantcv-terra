@@ -123,103 +123,107 @@ def main():
                                                                         obj_hierarchy=contour_hierarchy, device=device,
                                                                         debug=args.debug)
 
-    # Object combine kept objects
-    device, plant_contour, plant_mask = pcv.object_composition(img=img, contours=roi_contours,
-                                                               hierarchy=roi_contour_hierarchy, device=device,
-                                                               debug=args.debug)
+    # If there are no contours left we cannot measure anything
+    if len(roi_contours) > 0:
+        # Object combine kept objects
+        device, plant_contour, plant_mask = pcv.object_composition(img=img, contours=roi_contours,
+                                                                   hierarchy=roi_contour_hierarchy, device=device,
+                                                                   debug=args.debug)
 
-    outfile = False
-    if args.writeimg:
-        outfile = args.outdir + "/" + filename
+        outfile = False
+        if args.writeimg:
+            outfile = args.outdir + "/" + filename
 
-    # Find shape properties, output shape image (optional)
-    device, shape_header, shape_data, shape_img = pcv.analyze_object(img=img, imgname=args.image, obj=plant_contour,
-                                                                     mask=plant_mask, device=device, debug=args.debug,
-                                                                     filename=outfile)
+        # Find shape properties, output shape image (optional)
+        device, shape_header, shape_data, shape_img = pcv.analyze_object(img=img, imgname=args.image, obj=plant_contour,
+                                                                         mask=plant_mask, device=device,
+                                                                         debug=args.debug, filename=outfile)
 
-    # Shape properties relative to user boundary line (optional)
-    device, boundary_header, boundary_data, boundary_img = pcv.analyze_bound(img=img, imgname=args.image,
-                                                                             obj=plant_contour, mask=plant_mask,
-                                                                             line_position=380, device=device,
-                                                                             debug=args.debug, filename=outfile)
+        # Shape properties relative to user boundary line (optional)
+        device, boundary_header, boundary_data, boundary_img = pcv.analyze_bound(img=img, imgname=args.image,
+                                                                                 obj=plant_contour, mask=plant_mask,
+                                                                                 line_position=380, device=device,
+                                                                                 debug=args.debug, filename=outfile)
 
-    # Determine color properties: Histograms, Color Slices and Pseudocolored Images,
-    # output color analyzed images (optional)
-    device, color_header, color_data, color_img = pcv.analyze_color(img=img, imgname=args.image, mask=plant_mask,
-                                                                    bins=256, device=device, debug=args.debug,
-                                                                    hist_plot_type=None, pseudo_channel="v",
-                                                                    pseudo_bkg="img", resolution=300, filename=outfile)
+        # Determine color properties: Histograms, Color Slices and Pseudocolored Images,
+        # output color analyzed images (optional)
+        device, color_header, color_data, color_img = pcv.analyze_color(img=img, imgname=args.image, mask=plant_mask,
+                                                                        bins=256, device=device, debug=args.debug,
+                                                                        hist_plot_type=None, pseudo_channel="v",
+                                                                        pseudo_bkg="img", resolution=300,
+                                                                        filename=outfile)
 
-    # Output shape and color data
-    result = open(args.result, "a")
-    result.write('\t'.join(map(str, shape_header)) + "\n")
-    result.write('\t'.join(map(str, shape_data)) + "\n")
-    for row in shape_img:
-        result.write('\t'.join(map(str, row)) + "\n")
-    result.write('\t'.join(map(str, color_header)) + "\n")
-    result.write('\t'.join(map(str, color_data)) + "\n")
-    result.write('\t'.join(map(str, boundary_header)) + "\n")
-    result.write('\t'.join(map(str, boundary_data)) + "\n")
-    result.write('\t'.join(map(str, boundary_img)) + "\n")
-    for row in color_img:
-        result.write('\t'.join(map(str, row)) + "\n")
-    result.close()
+        # Output shape and color data
+        result = open(args.result, "a")
+        result.write('\t'.join(map(str, shape_header)) + "\n")
+        result.write('\t'.join(map(str, shape_data)) + "\n")
+        for row in shape_img:
+            result.write('\t'.join(map(str, row)) + "\n")
+        result.write('\t'.join(map(str, color_header)) + "\n")
+        result.write('\t'.join(map(str, color_data)) + "\n")
+        result.write('\t'.join(map(str, boundary_header)) + "\n")
+        result.write('\t'.join(map(str, boundary_data)) + "\n")
+        result.write('\t'.join(map(str, boundary_img)) + "\n")
+        for row in color_img:
+            result.write('\t'.join(map(str, row)) + "\n")
+        result.close()
 
-    # Find matching NIR image
-    device, nirpath = pcv.get_nir(path=path, filename=filename, device=device, debug=args.debug)
-    nir_rgb, nir_path, nir_filename = pcv.readimage(nirpath)
-    nir_img = cv2.imread(nirpath, 0)
+        # Find matching NIR image
+        device, nirpath = pcv.get_nir(path=path, filename=filename, device=device, debug=args.debug)
+        nir_rgb, nir_path, nir_filename = pcv.readimage(nirpath)
+        nir_img = cv2.imread(nirpath, 0)
 
-    # Make mask glovelike in proportions via dilation
-    device, d_mask = pcv.dilate(plant_mask, kernel=1, i=0, device=device, debug=args.debug)
+        # Make mask glovelike in proportions via dilation
+        device, d_mask = pcv.dilate(plant_mask, kernel=1, i=0, device=device, debug=args.debug)
 
-    # Resize mask
-    prop2, prop1 = conv_ratio()
-    device, nmask = pcv.resize(img=d_mask, resize_x=prop1, resize_y=prop2, device=device, debug=args.debug)
+        # Resize mask
+        prop2, prop1 = conv_ratio()
+        device, nmask = pcv.resize(img=d_mask, resize_x=prop1, resize_y=prop2, device=device, debug=args.debug)
 
-    # Convert the resized mask to a binary mask
-    device, bmask = pcv.binary_threshold(img=nmask, threshold=0, maxValue=255, object_type="light", device=device,
-                                         debug=args.debug)
+        # Convert the resized mask to a binary mask
+        device, bmask = pcv.binary_threshold(img=nmask, threshold=0, maxValue=255, object_type="light", device=device,
+                                             debug=args.debug)
 
-    device, crop_img = crop_sides_equally(mask=bmask, nir=nir_img, device=device, debug=args.debug)
+        device, crop_img = crop_sides_equally(mask=bmask, nir=nir_img, device=device, debug=args.debug)
 
-    # position, and crop mask
-    device, newmask = pcv.crop_position_mask(img=nir_img, mask=crop_img, device=device, x=34, y=9, v_pos="top",
-                                             h_pos="right", debug=args.debug)
+        # position, and crop mask
+        device, newmask = pcv.crop_position_mask(img=nir_img, mask=crop_img, device=device, x=34, y=9, v_pos="top",
+                                                 h_pos="right", debug=args.debug)
 
-    # Identify objects
-    device, nir_objects, nir_hierarchy = pcv.find_objects(img=nir_rgb, mask=newmask, device=device, debug=args.debug)
+        # Identify objects
+        device, nir_objects, nir_hierarchy = pcv.find_objects(img=nir_rgb, mask=newmask, device=device,
+                                                              debug=args.debug)
 
-    # Object combine kept objects
-    device, nir_combined, nir_combinedmask = pcv.object_composition(img=nir_rgb, contours=nir_objects,
-                                                                    hierarchy=nir_hierarchy, device=device,
-                                                                    debug=args.debug)
+        # Object combine kept objects
+        device, nir_combined, nir_combinedmask = pcv.object_composition(img=nir_rgb, contours=nir_objects,
+                                                                        hierarchy=nir_hierarchy, device=device,
+                                                                        debug=args.debug)
 
-    if args.writeimg:
-        outfile = args.outdir + "/" + nir_filename
+        if args.writeimg:
+            outfile = args.outdir + "/" + nir_filename
 
-    # Analyze NIR signal data
-    device, nhist_header, nhist_data, nir_imgs = pcv.analyze_NIR_intensity(img=nir_img, rgbimg=nir_rgb,
-                                                                           mask=nir_combinedmask, bins=256,
-                                                                           device=device, histplot=False,
-                                                                           debug=args.debug, filename=outfile)
+        # Analyze NIR signal data
+        device, nhist_header, nhist_data, nir_imgs = pcv.analyze_NIR_intensity(img=nir_img, rgbimg=nir_rgb,
+                                                                               mask=nir_combinedmask, bins=256,
+                                                                               device=device, histplot=False,
+                                                                               debug=args.debug, filename=outfile)
 
-    # Analyze the shape of the plant contour from the NIR image
-    device, nshape_header, nshape_data, nir_shape = pcv.analyze_object(img=nir_img, imgname=nir_filename,
-                                                                       obj=nir_combined, mask=nir_combinedmask,
-                                                                       device=device, debug=args.debug,
-                                                                       filename=outfile)
+        # Analyze the shape of the plant contour from the NIR image
+        device, nshape_header, nshape_data, nir_shape = pcv.analyze_object(img=nir_img, imgname=nir_filename,
+                                                                           obj=nir_combined, mask=nir_combinedmask,
+                                                                           device=device, debug=args.debug,
+                                                                           filename=outfile)
 
-    # Write NIR data to co-results file
-    coresult = open(args.coresult, "a")
-    coresult.write('\t'.join(map(str, nhist_header)) + "\n")
-    coresult.write('\t'.join(map(str, nhist_data)) + "\n")
-    for row in nir_imgs:
-        coresult.write('\t'.join(map(str, row)) + "\n")
-    coresult.write('\t'.join(map(str, nshape_header)) + "\n")
-    coresult.write('\t'.join(map(str, nshape_data)) + "\n")
-    coresult.write('\t'.join(map(str, nir_shape)) + "\n")
-    coresult.close()
+        # Write NIR data to co-results file
+        coresult = open(args.coresult, "a")
+        coresult.write('\t'.join(map(str, nhist_header)) + "\n")
+        coresult.write('\t'.join(map(str, nhist_data)) + "\n")
+        for row in nir_imgs:
+            coresult.write('\t'.join(map(str, row)) + "\n")
+        coresult.write('\t'.join(map(str, nshape_header)) + "\n")
+        coresult.write('\t'.join(map(str, nshape_data)) + "\n")
+        coresult.write('\t'.join(map(str, nir_shape)) + "\n")
+        coresult.close()
 
 
 if __name__ == '__main__':
