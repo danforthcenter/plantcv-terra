@@ -66,6 +66,38 @@ def conv_ratio(y=606.0, x=508.0, conv_x=1.125, conv_y=1.125, rat=1):
     return prop2, prop1
 
 
+# Remove contours completely contained within a region of interest
+def remove_countors_roi(mask, contours, hierarchy, roi, device, debug=None):
+    clean_mask = np.copy(mask)
+    # Loop over all contours in the image
+    for n, contour in enumerate(contours):
+        # This is the number of vertices in the contour
+        contour_points = len(contour) - 1
+        # Generate a list of x, y coordinates
+        stack = np.vstack(contour)
+        tests = []
+        # Loop over the vertices for the contour and do a point polygon test
+        for i in range(0, contour_points):
+            # The point polygon test returns
+            # 1 if the contour vertex is inside the ROI contour
+            # 0 if the contour vertex is on the ROI contour
+            # -1 if the contour vertex is outside the ROI contour
+            pptest = cv2.pointPolygonTest(contour=roi[0], pt=(stack[i][0], stack[i][1]), measureDist=False)
+            # Append the test result to the list of point polygon tests for this contour
+            tests.append(pptest)
+        # If all of the point polygon tests have a value of 1, then all the contour vertices are in the ROI
+        if all(t == 1 for t in tests):
+            # Fill in the contour as black
+            cv2.drawContours(image=clean_mask, contours=contours, contourIdx=n, color=0, thickness=-1, lineType=8,
+                             hierarchy=hierarchy)
+    if debug == "print":
+        pcv.print_image(filename=str(device) + "_remove_contours.png", img=clean_mask)
+    elif debug == "plot":
+        pcv.plot_image(clean_mask, cmap='gray')
+
+    return device, clean_mask
+
+
 # The main workflow
 def main():
     # Initialize device
@@ -124,34 +156,21 @@ def main():
                                                    debug=args.debug)
 
     # Remove contours completely contained within the stopper region of interest
-    device += 1
-    clean_mask = np.copy(green_fill_50)
-    # Loop over all contours in the image
-    for n, contour in enumerate(contours):
-        # This is the number of vertices in the contour 
-        contour_points = len(contour) - 1
-        # Generate a list of x, y coordinates
-        stack = np.vstack(contour)
-        tests = []
-        # Loop over the vertices for the contour and do a point polygon test
-        for i in range(0, contour_points):
-            # The point polygon test returns
-            # 1 if the contour vertex is inside the ROI contour
-            # 0 if the contour vertex is on the ROI contour
-            # -1 if the contour vertex is outside the ROI contour
-            pptest = cv2.pointPolygonTest(contour=stopper_roi[0], pt=(stack[i][0], stack[i][1]), measureDist=False)
-            # Append the test result to the list of point polygon tests for this contour
-            tests.append(pptest)
-        # If all of the point polygon tests have a value of 1, then all the contour vertices are in the ROI
-        if all(t == 1 for t in tests):
-            # Fill in the contour as black
-            cv2.drawContours(image=clean_mask, contours=contours, contourIdx=n, color=0, thickness=-1, lineType=8, 
-                             hierarchy=hierarchy)
-    if args.debug is not None:
-        pcv.print_image(filename=str(device) + "_remove_stopper_contours.png", img=clean_mask)
+    device, remove_stopper_mask = remove_countors_roi(mask=green_fill_50, contours=contours, hierarchy=hierarchy,
+                                                      roi=stopper_roi, device=device, debug=args.debug)
+
+    # Define an ROI for a screw hole
+    device, screw_roi, screw_hierarchy = pcv.define_roi(img=img, shape="rectangle", device=device, roi=None,
+                                                        roi_input="default", debug=args.debug, adjust=True, x_adj=1870,
+                                                        y_adj=1010, w_adj=-485, h_adj=-960)
+
+    # Remove contours completely contained within the screw region of interest
+    device, remove_screw_mask = remove_countors_roi(mask=remove_stopper_mask, contours=contours, hierarchy=hierarchy,
+                                                    roi=screw_roi, device=device, debug=args.debug)
 
     # Identify objects
-    device, contours, contour_hierarchy = pcv.find_objects(img=img, mask=clean_mask, device=device, debug=args.debug)
+    device, contours, contour_hierarchy = pcv.find_objects(img=img, mask=remove_screw_mask, device=device,
+                                                           debug=args.debug)
 
     # Define ROI
     device, roi, roi_hierarchy = pcv.define_roi(img=img, shape="rectangle", device=device, roi=None,
