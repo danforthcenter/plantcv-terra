@@ -118,13 +118,13 @@ def main():
 
     # Extract core plant region from the image to preserve delicate plant features during filtering
     device += 1
-    plant_region = blue_tri[250:1800, 500:2000]
+    plant_region = blue_tri[0:1750, 600:2080]
     if args.debug is not None:
         pcv.print_image(filename=str(device) + "_extract_plant_region.png", img=plant_region)
 
     # Use a Gaussian blur to disrupt the strong edge features in the cabinet
-    device, blur_gaussian = pcv.gaussian_blur(device=device, img=blue_tri, ksize=(3, 3), sigmax=0, sigmay=None,
-                                              debug=args.debug)
+    device, blur_gaussian = pcv.gaussian_blur(device=device, img=blue_tri, ksize=(3, 3),
+                                              sigmax=0, sigmay=None, debug=args.debug)
 
     # Threshold the blurred image to remove features that were blurred
     device, blur_thresholded = pcv.binary_threshold(img=blur_gaussian, threshold=250, maxValue=255, object_type="light",
@@ -132,7 +132,7 @@ def main():
 
     # Add the plant region back in to the filtered image
     device += 1
-    blur_thresholded[250:1800, 500:2000] = plant_region
+    blur_thresholded[0:1750, 600:2080] = plant_region
     if args.debug is not None:
         pcv.print_image(filename=str(device) + "_replace_plant_region.png", img=blur_thresholded)
 
@@ -141,12 +141,12 @@ def main():
                                     device=device, debug=args.debug)
 
     # Apply a small median blur to break up pot edges
-    device, med_blur = pcv.median_blur(img=np.copy(blue_fill_50), ksize=1, device=device, debug=args.debug)
+    device, med_blur = pcv.median_blur(img=np.copy(blue_fill_50), ksize=3, device=device, debug=args.debug)
 
     # Define an ROI for the barcode label
     device, label_roi, label_hierarchy = pcv.define_roi(img=img, shape="rectangle", device=device, roi=None,
                                                         roi_input="default", debug=args.debug, adjust=True,
-                                                        x_adj=980, y_adj=1630, w_adj=-1000, h_adj=-100)
+                                                        x_adj=1100, y_adj=1350, w_adj=-1070, h_adj=-590)
 
     # Identify all remaining contours in the binary image
     device, contours, hierarchy = pcv.find_objects(img=img, mask=np.copy(med_blur), device=device, debug=args.debug)
@@ -161,8 +161,8 @@ def main():
 
     # Define ROI
     device, roi, roi_hierarchy = pcv.define_roi(img=img, shape="rectangle", device=device, roi=None,
-                                                roi_input="default", debug=args.debug, adjust=True, x_adj=400, y_adj=0,
-                                                w_adj=-350, h_adj=-300)
+                                                roi_input="default", debug=args.debug, adjust=True, x_adj=565, y_adj=0,
+                                                w_adj=-490, h_adj=-550)
 
     # Decide which objects to keep
     device, roi_contours, roi_contour_hierarchy, _, _ = pcv.roi_objects(img=img, roi_type="partial", roi_contour=roi,
@@ -190,7 +190,7 @@ def main():
         # Shape properties relative to user boundary line (optional)
         device, boundary_header, boundary_data, boundary_img = pcv.analyze_bound(img=img, imgname=args.image,
                                                                                  obj=plant_contour, mask=plant_mask,
-                                                                                 line_position=370, device=device,
+                                                                                 line_position=680, device=device,
                                                                                  debug=args.debug, filename=outfile)
 
         # Determine color properties: Histograms, Color Slices and Pseudocolored Images,
@@ -235,7 +235,7 @@ def main():
         device, crop_img = crop_sides_equally(mask=bmask, nir=nir_img, device=device, debug=args.debug)
 
         # position, and crop mask
-        device, newmask = pcv.crop_position_mask(img=nir_img, mask=crop_img, device=device, x=229, y=2, v_pos="bottom",
+        device, newmask = pcv.crop_position_mask(img=nir_img, mask=crop_img, device=device, x=34, y=9, v_pos="top",
                                                  h_pos="right", debug=args.debug)
 
         # Identify objects

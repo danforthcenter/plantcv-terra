@@ -8,7 +8,7 @@ import argparse
 
 # Parse command-line arguments
 def options():
-    parser = argparse.ArgumentParser(description="Process side-view images from the TERRA-REF LT1 experiment.")
+    parser = argparse.ArgumentParser(description="Process side-view images from the TERRA-REF LT2 experiment.")
     parser.add_argument("-i", "--image", help="Input VIS image file.", required=True)
     parser.add_argument("-r", "--result", help="VIS result file.", required=True)
     parser.add_argument("-r2", "--coresult", help="NIR result file for the co-processed image.", required=True)
