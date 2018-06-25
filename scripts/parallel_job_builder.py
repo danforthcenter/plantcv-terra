@@ -6,7 +6,7 @@ import argparse
 import time
 import datetime
 from subprocess import call
-import plantcv.parallel as pcvp
+#import plantcv.parallel as pcvp
 import re
 from dateutil.parser import parse as dt_parser
 import json
@@ -262,7 +262,7 @@ def main():
     config_file.close()
 
     # Open log files
-    error_log = pcvp.file_writer('error.log')
+    #error_log = pcvp.file_writer('error.log')
 
     # Read image file names
     ###########################################
