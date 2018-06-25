@@ -237,7 +237,7 @@ def main():
             file_parts = os.path.split(images[job])
             batchfile.write("job_args = " + images[job] + " " + matrix + " " + os.path.join(args.outdir, file_parts[-2], file_parts[-1]) + "\n")
             batchfile.write("queue\n")
-        job_num += args.numjobs
+        job_num += 1000
 
         # Add job batch file to the DAGman file
         dagman.write("JOB batch" + str(batch) + " " + bname + "\n")
