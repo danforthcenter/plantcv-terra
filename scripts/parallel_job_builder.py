@@ -163,9 +163,9 @@ def create_jobfile(jobfile, outdir, exe, arguments, group=None):
         jobfile.write("accounting_group = " + group + '\n')
     jobfile.write("executable = " + exe + '\n')
     jobfile.write("arguments = " + arguments + '\n')
-    jobfile.write("log = $(output_dir)/$(Cluster).$(Process).bottleneck-distance.log\n")
-    jobfile.write("error = $(output_dir)/$(Cluster).$(Process).bottleneck-distance.error\n")
-    jobfile.write("output = $(output_dir)/$(Cluster).$(Process).bottleneck-distance.out\n")
+    jobfile.write("log = $(output_dir)/$(Cluster).$(Process).color-correction.log\n")
+    jobfile.write("error = $(output_dir)/$(Cluster).$(Process).color-correction.error\n")
+    jobfile.write("output = $(output_dir)/$(Cluster).$(Process).color-corrections.out\n")
     # jobfile.write("queue\n")
 
 
@@ -234,7 +234,7 @@ def main():
                 matrix = config["z2000"]
             else:
                 matrix = config["z1"]
-            file_parts = os.path.split(images[job])
+            file_parts = images[job].split('/')
             batchfile.write("job_args = " + images[job] + " " + matrix + " " + os.path.join(args.outdir, file_parts[-2], file_parts[-1]) + "\n")
             batchfile.write("queue\n")
         job_num += 1000
