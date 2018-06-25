@@ -206,7 +206,7 @@ def main():
     # Job builder
     print("Building job list... ", file=sys.stderr)
     # Create DAGman file
-    dagman = open(args.jobname + '.dag', 'w')
+    dagman = open(os.path.basename(ars.dir) + '.dag', 'w')
 
     # Job counter
     job_num = 0
