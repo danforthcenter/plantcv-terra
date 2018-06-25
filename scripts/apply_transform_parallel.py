@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from plantcv import plantcv as pcv
 import sys
 import cv2
