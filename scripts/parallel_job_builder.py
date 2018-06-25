@@ -224,7 +224,7 @@ def main():
             os.mkdir("logs")
         create_jobfile(batchfile, "logs", args.pipeline, "$(job_args)", args.group)
 
-        for job in range(job_num, job_num + 1000.0):
+        for job in range(job_num, job_num + 1000):
             if job == len(images):
                 break
             matrix = ""
