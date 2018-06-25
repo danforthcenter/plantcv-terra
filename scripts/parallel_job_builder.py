@@ -127,7 +127,7 @@ def metadata_parser(data_dir, output_dir, file_type="png"):
             img_list = data[colnames['tiles']]
             if img_list[:-1] == ';':
                 img_list = img_list[:-1]
-            if len(img_list == 0):
+            if len(img_list)==0:
                 csvout.write(row + '\n')
             imgs = img_list.split(';')
             kept_tiles = []
