@@ -310,7 +310,6 @@ def main():
         dagman.write("JOB batch" + str(batch) + " " + bname + "\n")
     dagman.close()
 
-
 ###########################################
 
 if __name__ == '__main__':

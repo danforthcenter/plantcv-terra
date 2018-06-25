@@ -17,6 +17,5 @@ def main():
 
     pcv.print_image(corrected_img, output_path)
 
-
 if __name__ == "__main__":
     main()
