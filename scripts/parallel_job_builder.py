@@ -64,23 +64,7 @@ def options():
     parser.add_argument("-p", "--pipeline", help='Pipeline script file.', required=True)
     parser.add_argument("-i", "--outdir", help='Output directory for images. Not required by all pipelines.',
                         default=".")
-    parser.add_argument("-D", "--dates",
-                        help='Date range. Format: YYYY-MM-DD-hh-mm-ss_YYYY-MM-DD-hh-mm-ss. If the second date '
-                             'is excluded then the current date is assumed.',
-                        required=False)
     parser.add_argument("-t", "--type", help='Image format type (extension).', default="png")
-    parser.add_argument("-l", "--delimiter", help='Image file name metadata delimiter character.', default='_')
-    parser.add_argument("-f", "--meta",
-                        help='Image file name metadata format. List valid metadata fields separated by the '
-                             'delimiter (-l/--delimiter). Valid metadata fields are: ' +
-                             ', '.join(map(str, list(valid_meta.keys()))), default='imgtype_camera_frame_zoom_id')
-    parser.add_argument("-M", "--match",
-                        help='Restrict analysis to images with metadata matching input criteria. Input a '
-                             'metadata:value comma-separated list. This is an exact match search. '
-                             'E.g. imgtype:VIS,camera:SV,zoom:z500',
-                        required=False)
-    parser.add_argument("-w", "--writeimg", help='Include analysis images in output.', default=False,
-                        action="store_true")
     parser.add_argument('-c', '--config', help= "file of matrix assignments per image", required= True)
     parser.add_argument("-g", "--group", help= "condor accounting group", required= True)
     args = parser.parse_args()
@@ -98,57 +82,6 @@ def options():
     if not os.path.exists(args.outdir):
         os.mkdir(args.outdir)
 
-    if args.adaptor != 'phenofront' and args.adaptor != 'filename':
-        raise ValueError("Adaptor must be either phenofront or filename")
-
-    if args.dates:
-        dates = args.dates.split('_')
-        if len(dates) == 1:
-            # End is current time
-            dates.append(datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
-        start = map(int, dates[0].split('-'))
-        end = map(int, dates[1].split('-'))
-        # Convert start and end dates to Unix time
-        start_td = datetime.datetime(*start) - datetime.datetime(1970, 1, 1)
-        end_td = datetime.datetime(*end) - datetime.datetime(1970, 1, 1)
-        args.start_date = (start_td.days * 24 * 3600) + start_td.seconds
-        args.end_date = (end_td.days * 24 * 3600) + end_td.seconds
-    else:
-        end = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        end_list = map(int, end.split('-'))
-        end_td = datetime.datetime(*end_list) - datetime.datetime(1970, 1, 1)
-        args.start_date = 1
-        args.end_date = (end_td.days * 24 * 3600) + end_td.seconds
-
-    args.valid_meta = valid_meta
-    args.start_time = start_time
-
-    # Image filename metadata structure
-    fields = args.meta.split(args.delimiter)
-    # Keep track of the number of metadata fields matching filenames should have
-    args.meta_count = len(fields)
-    structure = {}
-    for i, field in enumerate(fields):
-        structure[field] = i
-    args.fields = structure
-
-    # Are the user-defined metadata valid?
-    for field in args.fields:
-        if field not in args.valid_meta:
-            raise ValueError("The field {0} is not a currently supported metadata type.".format(field))
-
-    # Metadata restrictions
-    args.imgtype = {}
-    if args.match is not None:
-        pairs = args.match.split(',')
-        for pair in pairs:
-            key, value = pair.split(':')
-            args.imgtype[key] = value
-    else:
-        args.imgtype['None'] = 'None'
-
-    if (args.coprocess is not None) and ('imgtype' not in args.imgtype):
-        raise ValueError("When the coprocess imgtype is defined, imgtype must be included in match.")
 
     return args
 
