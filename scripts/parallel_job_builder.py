@@ -10,6 +10,7 @@ from subprocess import call
 import re
 from dateutil.parser import parse as dt_parser
 import json
+from math import ceil
 
 # Parse command-line arguments
 ###########################################
