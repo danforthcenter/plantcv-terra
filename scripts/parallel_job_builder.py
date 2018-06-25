@@ -221,7 +221,7 @@ def main():
         batchfile = open(bname, "w")
         # Initialize batch condor file
         if not os.path.exists("logs"):
-            os.rmdir("logs")
+            os.mkdir("logs")
         create_jobfile(batchfile, "logs", args.pipeline, "$(job_args)", args.group)
 
         for job in range(job_num, job_num + 1000.0):
