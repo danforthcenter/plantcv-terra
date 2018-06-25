@@ -81,7 +81,6 @@ def options():
                         required=False)
     parser.add_argument("-w", "--writeimg", help='Include analysis images in output.', default=False,
                         action="store_true")
-    parser.add_argument("-m", "--matrix", help = "Transformation matrix .npz file.", required= True)
     parser.add_argument('-c', '--config', help= "file of matrix assignments per image", required= True)
     parser.add_argument("-g", "--group", help= "condor accounting group", required= True)
     args = parser.parse_args()
