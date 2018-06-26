@@ -213,7 +213,7 @@ def main():
     job_num = 0
 
     # Number of batches
-    batches = int(ceil(len(images) / 100.0))
+    batches = int(ceil(len(images) / 300.0))
 
     for batch in range(0, batches):
         # Create job batch (cluster) file
@@ -224,7 +224,7 @@ def main():
             os.mkdir("logs")
         create_jobfile(batchfile, "logs", args.pipeline, "$(job_args)", args.group)
 
-        for job in range(job_num, job_num + 100):
+        for job in range(job_num, job_num + 300):
             if job == len(images):
                 break
             matrix = ""
@@ -237,7 +237,7 @@ def main():
             file_parts = images[job].split('/')
             batchfile.write("job_args = " + images[job] + " " + matrix + " " + os.path.join(args.outdir, file_parts[-2], file_parts[-1]) + "\n")
             batchfile.write("queue\n")
-        job_num += 100
+        job_num += 300
 
         # Add job batch file to the DAGman file
         dagman.write("JOB batch" + str(batch) + " " + bname + "\n")
