@@ -49,7 +49,7 @@ def main():
         out_file.write(','.join(element))
         snap_path = os.path.join(input_dir, "/snapshot" + element[1])
         dest_path = output_dir
-        shutil.copy(snap_path, dest_path)
+        shutil.copytree(snap_path, dest_path)
 
 if __name__ == "__main__":
     main()
