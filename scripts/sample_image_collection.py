@@ -1,7 +1,7 @@
 import os
 import sys
-import shutil
 import random
+import shutil
 
 def fill_array_from_csv(filename, name_param):
     line_array = []
@@ -13,6 +13,12 @@ def fill_array_from_csv(filename, name_param):
     input_file.close()
     return line_array
 
+def copytree_for_real(source_path, dest_path):
+    if not os.path.exists(des_path):
+        os.mkdir(dest_path)
+    for root, dirs, files in os.walk(source_path):
+        for file in files:
+            shutil.copyfile(os.path.join(root, file), dest_path)
 
 def main():
     input_dir  = sys.argv[1]
@@ -40,13 +46,16 @@ def main():
         num_arr.append(r)
 
     # move snapshot folders into output_dir
+    if not os.path.exists(output_dir):
+        os.mkdir(output_dir)
+
     out_file = open("test.csv", 'w')
 
     for element in sample_array:
         out_file.write(','.join(element))
         snap_path = os.path.join(input_dir, "snapshot" + element[1])
-        dest_path = output_dir
-        shutil.copy(snap_path, dest_path)
+        dest_path = os.path.join(output_dir, "snapshot" + element[1])
+        copytree_for_real(snap_path, dest_path)
 
     out_file.close()
 if __name__ == "__main__":
