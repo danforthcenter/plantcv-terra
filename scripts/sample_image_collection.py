@@ -40,14 +40,11 @@ def main():
         num_arr.append(r)
 
     # move snapshot folders into output_dir
-    if not os.path.exists(output_dir):
-        os.mkdir(output_dir)
-
     out_file = open("test.csv", 'w')
 
     for element in sample_array:
         out_file.write(','.join(element))
-        snap_path = os.path.join(input_dir, "/snapshot" + element[1])
+        snap_path = os.path.join(input_dir, "snapshot" + element[1])
         dest_path = output_dir
         shutil.copytree(snap_path, dest_path)
 
