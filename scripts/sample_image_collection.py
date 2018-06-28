@@ -18,7 +18,7 @@ def copytree_for_real(source_path, dest_path):
         os.mkdir(dest_path)
     for root, dirs, files in os.walk(source_path):
         for file in files:
-            shutil.copyfile(os.path.join(root, file), dest_path)
+            shutil.copy(os.path.join(root, file), dest_path)
 
 def main():
     input_dir  = sys.argv[1]
