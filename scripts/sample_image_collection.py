@@ -18,7 +18,7 @@ def main():
     input_dir  = sys.argv[1]
     output_dir  = sys.argv[2]
     output_csv  = sys.argv[3]
-    num_samples = sys.argv[4]
+    num_samples = int(sys.argv[4])
 
     # find input csv
     for root, dirs, files in os.walk(input_dir):
