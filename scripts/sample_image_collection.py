@@ -49,7 +49,7 @@ def main():
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    out_file = open("test.csv", 'w')
+    out_file = open(os.path.join(output_dir, "sample_snapshot.csv"), 'w')
 
     for element in sample_array:
         out_file.write(','.join(element))
