@@ -14,7 +14,7 @@ def fill_array_from_csv(filename, name_param):
     return line_array
 
 def copytree_for_real(source_path, dest_path):
-    if not os.path.exists(des_path):
+    if not os.path.exists(dest_path):
         os.mkdir(dest_path)
     for root, dirs, files in os.walk(source_path):
         for file in files:
