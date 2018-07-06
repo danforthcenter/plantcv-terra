@@ -92,7 +92,7 @@ def main():
     elif "TM016" in args.image:
         h = 1555
     else:
-        h = 1350
+        h = 1320
     roi_contour, roi_hierarchy = pcv.roi.rectangle(x=570, y=0, h=h, w=1900-550, img=img) #grab ROI
 
 
