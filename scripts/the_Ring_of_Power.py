@@ -56,8 +56,8 @@ def main():
 
     device, mask = pcv.naive_bayes_classifier(img, args.pdf, device, args.debug) #naive bayes on image
 
-    if args.writeimg:
-        pcv.print_image(img=mask["94,104,47"], filename=outfile + "_nb_mask.png")
+    #if args.writeimg:
+    #   pcv.print_image(img=mask["94,104,47"], filename=outfile + "_nb_mask.png")
 
 
     # In[116]:
