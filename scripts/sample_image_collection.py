@@ -6,12 +6,13 @@ import shutil
 def fill_array_from_csv(filename, name_param):
     line_array = []
     input_file = open(filename, 'r')
+    header = input_file.readline()
     for line in input_file:
         if name_param in line:
             element_arr = line.split(',')
             line_array.append(element_arr)
     input_file.close()
-    return line_array
+    return header, line_array
 
 def copytree_for_real(source_path, dest_path):
     if not os.path.exists(dest_path):
@@ -33,7 +34,7 @@ def main():
                 input_csv = file
 
     # fill line array (an array of arrays) with arrays of each row's contents
-    line_array = fill_array_from_csv(os.path.join(input_dir, input_csv), "VIS")
+    header, line_array = fill_array_from_csv(os.path.join(input_dir, input_csv), "VIS")
 
     # get random elements
     sample_array = []  # array of sampled elements
@@ -49,8 +50,8 @@ def main():
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
 
-    out_file = open(os.path.join(output_dir, "sample_snapshot.csv"), 'w')
-
+    out_file = open(os.path.join(output_dir, output_csv), 'w')
+    out_file.write(header)
     for element in sample_array:
         out_file.write(','.join(element))
         snap_path = os.path.join(input_dir, "snapshot" + element[1])
