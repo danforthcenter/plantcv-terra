@@ -20,7 +20,7 @@ def options():
     parser = argparse.ArgumentParser(description="Arguments for the Ring of Power.")
     parser.add_argument("-i", "--image", help="Input image file.", required=True)
     parser.add_argument("-d", "--debug", help="Turn on debug, prints intermediate images.", default=None)
-    parser.add_argument("-w","--writeimg", help="write out images.", default=False)
+    parser.add_argument("-w","--writeimg", help="write out images.", default=False, action = "store_true")
     parser.add_argument("-r","--result", help="result file.", required=False)
     parser.add_argument("-o", "--outdir", help="Output directory for image files.", required=False)
     parser.add_argument("-n", "--npz", help="Background Mask for subtraction.", required=True)
@@ -40,6 +40,9 @@ def main():
     device = 0 #set device
     params.debug = args.debug #set debug
 
+    outfile = False
+    if args.writeimg:
+        outfile = os.path.join(args.outdir, os.path.basename(args.image)[:-4])
 
     # In[114]:
 
@@ -54,7 +57,7 @@ def main():
     device, mask = pcv.naive_bayes_classifier(img, args.pdf, device, args.debug) #naive bayes on image
 
     if args.writeimg:
-        pcv.print_image(img=mask["94,104,47"], filename=os.path.join(args.outdir, args.image[:-4] + "_nb_mask.png"))
+        pcv.print_image(img=mask["94,104,47"], filename=outfile + "_nb_mask.png")
 
 
     # In[116]:
@@ -67,9 +70,8 @@ def main():
 
 
     #image blurring using scipy median filter
-    blurred_img = ndimage.median_filter(new_mask, (5,1))
-    blurred_img = ndimage.median_filter(blurred_img, (1,5))
-    pcv.plot_image(blurred_img, cmap="gray")
+    blurred_img = ndimage.median_filter(new_mask, (7,1))
+    blurred_img = ndimage.median_filter(blurred_img, (1,7))
     device, cleaned = pcv.fill(np.copy(blurred_img), np.copy(blurred_img), 50, 0, args.debug) #fill leftover noise
 
 
@@ -110,19 +112,15 @@ def main():
                                                                    hierarchy=hierarchy, device=device, debug=args.debug)
 
         if args.writeimg:
-            pcv.print_image(img=plant_mask, filename=os.path.join(args.outdir, args.image[:-4] + "_mask.png"))
+            pcv.print_image(img=plant_mask, filename=outfile + "_mask.png")
 
 
         # In[122]:
 
-        outfile = False
-        if args.writeimg:
-            outfile = os.path.join(args.outdir, args.image)
-
         # Find shape properties, output shape image (optional)
         device, shape_header, shape_data, shape_img = pcv.analyze_object(img=img, imgname=args.image, obj=plant_contour,
                                                                          mask=plant_mask, device=device, debug=args.debug,
-                                                                         filename=outfile)
+                                                                         filename=outfile + ".png")
 
 
         # In[123]:
@@ -138,7 +136,7 @@ def main():
         # Shape properties relative to user boundary line (optional)
         device, boundary_header, boundary_data, boundary_img = pcv.analyze_bound_horizontal(img=img, obj=plant_contour,
                                                                                  mask=plant_mask, line_position=line_position,
-                                                                                 device=device, debug=args.debug, filename=outfile)
+                                                                                 device=device, debug=args.debug, filename=outfile + ".png")
 
 
         # In[124]:
@@ -149,7 +147,7 @@ def main():
         device, color_header, color_data, color_img = pcv.analyze_color(img=img, imgname=args.image, mask=plant_mask, bins=256,
                                                                         device=device, debug=args.debug, hist_plot_type=None,
                                                                         pseudo_channel="v", pseudo_bkg="img", resolution=300,
-                                                                        filename=outfile)
+                                                                        filename=outfile + ".png")
 
 
         # In[55]:
