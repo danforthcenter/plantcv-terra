@@ -12,6 +12,6 @@ log             = $(ID).log
 
 
 executable      =/home/apokorny/plantcv/plantcv-pipeline.py
-arguments       = "-d /home/apokorny/sample_TM022 -p /home/apokorny/the_Ring_of_Power.py -i /home/apokorny/Plantcv_Terra_processing/TM022_img_results -s LT1LT4.sqlite3 -T 20 -f imgtype_camera_frame_zoom_lifter_gain_exposure_other_id_other -w -o '''--pdf ./pdf.pdf --npz ./backgrounds/background_square.npz'''"
+arguments       = "-d /home/apokorny/TM022 -p /home/apokorny/the_Ring_of_Power.py -i /home/apokorny/Plantcv_Terra_processing/TM022_img_results -s LT1LT4.sqlite3 -T 20 -f imgtype_camera_frame_zoom_lifter_gain_exposure_other_id_other -w -o '''--pdf ./pdf.pdf --npz ./backgrounds/background_square.npz'''"
 
 queue
