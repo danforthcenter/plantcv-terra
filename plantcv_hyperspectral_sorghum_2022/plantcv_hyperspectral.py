@@ -71,14 +71,15 @@ def main():
     args=options()
 
     pcv.params.debug = args.debug
-    filepathname = os.path.basename(args.image)
-    pathname = os.path.join(args.outdir, filepathname.rstrip(".png"))
-    print(pathname)
+    if (args.writeimg == True):
+        filepathname = os.path.basename(args.image)
+        pathname = os.path.join(args.outdir, filepathname.rstrip(".png"))
+        print(pathname)
 
-    if os.path.exists(pathname) == False:
-    	os.mkdir(pathname)
+        if os.path.exists(pathname) == False:
+        	os.mkdir(pathname)
 
-    pcv.params.debug_outdir = pathname
+        pcv.params.debug_outdir = pathname
     #  pcv.outputs.clear()
 
     img, path, filename = pcv.readimage(filename=args.image)
@@ -220,37 +221,6 @@ def main():
     labeled_img2 = pcv.morphology.segment_path_length(segmented_img=segmented_img,
                                                       objects=leaf_obj)
 
-    # In[129]:
-
-    labeled_img3 = pcv.morphology.segment_euclidean_length(segmented_img=segmented_img,
-                                                           objects=leaf_obj)
-
-    # In[131]:
-
-    labeled_img4 = pcv.morphology.segment_curvature(segmented_img=segmented_img,
-                                                    objects=leaf_obj)
-
-
-    # In[130]:
-
-    labeled_img5 = pcv.morphology.segment_angle(segmented_img=segmented_img,
-                                                                              objects=leaf_obj)
-    # In[135]:
-
-
-    #NOTE: Below sections img6 and img7 were commented out because they were not able to run.
-
-##   labeled_img6 = pcv.morphology.segment_tangent_angle(segmented_img=segmented_img,
-##                                                      objects=leaf_obj, size=15)
-
-##     In[ ]
-
-##    labeled_img7 = pcv.morphology.segment_insertion_angle(skel_img=img1,
-##                                                          segmented_img=segmented_img,
-##                                                          leaf_objects=leaf_obj,
-##                                                          stem_objects=stem_obj,
-##                                                          size=25)
-
     # In[156]:
 
     print(path)
@@ -270,7 +240,7 @@ def main():
                 refpts = [(28, 72), (30, 332), (262,422), (600, 75),
                                                     (594, 333), (364, 420)],
                 method='lmeds')
-	
+
         img_warped_original, mat = pcv.transform.warp(img=img,
                 refimg=nir_img,
                 pts = [(229, 241), (234, 1156), (1050, 1467), (2230, 241),
@@ -314,7 +284,7 @@ def main():
             	method='lmeds')
 
 
-    analysis_nir = pcv.analyze_nir_intensity(nir_img,img_warped, 256, histplot=True, label = "default")
+    analysis_nir = pcv.analyze_nir_intensity(nir_img,img_warped, 256, label = "default")
 
     # In[164]:
     #print(pcv.outputs)
@@ -350,12 +320,14 @@ def main():
 
 
     # Calculate histogram
-
-    Histogram_for_Hyperspectral(gdvi.array_data, min = -2, max = 2, mask = img_warped)
-
-    Histogram_for_Hyperspectral(psri.array_data, min = np.amin(psri.array_data), max = np.amax(psri.array_data), mask = img_warped, label_addition = "PSRI array data")
-
-    Histogram_for_Hyperspectral(ndvi.array_data, min = -1, max = 1, mask = img_warped, label_addition = "NDVI array data")
+    gdvi_hyper = pcv.hyperspectral.analyze_index(index_array=gdvi, mask=img_warped, bins=100, min_bin=-2, max_bin=2, label="default")
+    psri_hyper = pcv.hyperspectral.analyze_index(index_array=psri, mask=img_warped, bins=100, min_bin=np.amin(psri.array_data), max_bin=np.amax(psri.array_data), label="PSRI array data")
+    ndvi_hyper = pcv.hyperspectral.analyze_index(index_array=ndvi, mask=img_warped, bins=100, min_bin=-1, max_bin=1, label="NDVI array data")
+##    Histogram_for_Hyperspectral(gdvi.array_data, min = -2, max = 2, mask = img_warped)
+##
+##    Histogram_for_Hyperspectral(psri.array_data, min = np.amin(psri.array_data), max = np.amax(psri.array_data), mask = img_warped, label_addition = "PSRI array data")
+##
+##    Histogram_for_Hyperspectral(ndvi.array_data, min = -1, max = 1, mask = img_warped, label_addition = "NDVI array data")
 
     pcv.outputs.save_results(filename=args.result)
   #  pcv.outputs.clear()
