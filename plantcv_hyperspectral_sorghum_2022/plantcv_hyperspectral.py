@@ -36,37 +36,6 @@ def rotateImage(image, angle):
     new_image = cv2.warpAffine(image, rot_mat, (col,row))
     return new_image
 
-def Histogram_for_Hyperspectral(array_data, mask, min=-2, max =2, label_addition = "gdvi array data"):
-    fig_hist, hist_data = histogram(array_data, mask=mask, bins=256, lower_bound=min, upper_bound=max, title=None,
-                                    hist_data=True)
-
-    masked_array = array_data[np.where(mask > 0)]
-    _mean = np.average(masked_array)
-    _median = np.median(masked_array)
-    _std = np.std(masked_array)
-
-    _mean = np.float64(_mean)
-    _median =np.float64(_median)
-    _std = np.float64(_std)
-
-    outputs.add_observation(sample='default', variable='Mean_Value ' + str(label_addition), trait='Mean Value of ' + str(label_addition),
-                            method='custom', scale='none', datatype=float,
-                            value=_mean, label='none')
-
-    outputs.add_observation(sample='default', variable='Median_Value ' + str(label_addition), trait='Median Value of ' + str(label_addition),
-                            method='custom', scale='none', datatype=float,
-                            value=_median, label='none')
-    outputs.add_observation(sample='default', variable='STD_Value ' + str(label_addition), trait='STDev Value of ' + str(label_addition),
-                            method='custom', scale='none', datatype=float,
-                            value=_std, label='none')
-    outputs.add_observation(sample='default', variable=str(label_addition)+'_frequencies', trait=str(label_addition) +  ' frequencies',
-                            method='custom', scale='frequency', datatype=list,
-                            value=hist_data['hist_count'].tolist(), label=hist_data["pixel intensity"].tolist())
-
-
-    return hist_data["pixel intensity"].tolist(), hist_data['hist_count'].tolist()
-
-
 def main():
     args=options()
 
@@ -187,45 +156,6 @@ def main():
     # Pseudocolor the grayscale image
     pseudocolored_img = pcv.visualize.pseudocolor(gray_img=s, mask=kept_mask, cmap='jet')
 
-    skeleton = pcv.morphology.skeletonize(mask=kept_mask)
-
-    #pcv.params.line_thickness = 3
-    if "z2000" in filename:
-        img1,test1,test2 = pcv.morphology.prune(skel_img=skeleton, size=40)
-    else :
-        img1,test1,test2 = pcv.morphology.prune(skel_img=skeleton, size=82)
-
-    # Identify branch points
-    branch_pts_mask = pcv.morphology.find_branch_pts(skel_img=img1, mask=kept_mask)
-
-    # Identify tip points
-    tip_pts_mask = pcv.morphology.find_tips(skel_img=img1, mask=None)
-
-    # In[128]:
-
-    pcv.params.line_thickness = 5 #was 8 and changed to 5 which is default
-
-    # Segment a skeleton into pieces
-    seg_img, edge_objects = pcv.morphology.segment_skeleton(skel_img=img1, mask=kept_mask)
-
-    # Sort segments into leaf objects and stem objects
-    leaf_obj, stem_obj = pcv.morphology.segment_sort(skel_img=img1, objects=edge_objects,
-                                                     mask=kept_mask)
-
-    # Identify segments
-    segmented_img, labeled_img = pcv.morphology.segment_id(skel_img=img1, objects=leaf_obj,
-                                                           mask=kept_mask)
-
-    # In[132]:
-
-    labeled_img2 = pcv.morphology.segment_path_length(segmented_img=segmented_img,
-                                                      objects=leaf_obj)
-
-    # In[156]:
-
-    print(path)
-   # print(img)
-    print(filename)
     nir_path = pcv.get_nir(path=path,filename=filename)
     nir_img, path, img_filename = pcv.readimage(filename= nir_path, mode="native")
 
